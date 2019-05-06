@@ -1,0 +1,17 @@
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.space {
+    margin-top: 2rem;
+}
+
+.more-space {
+    margin-top: 6rem;
+}
+
+.card {
+    background: #f3f3f3
+}

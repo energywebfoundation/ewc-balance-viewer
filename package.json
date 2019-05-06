@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "webpack-dev-server"
+    "start:dev": "webpack-dev-server --output-public-path=/dist/ -d --watch"
   },
   "repository": {
     "type": "git",
@@ -20,9 +20,10 @@
   "dependencies": {
     "@types/react": "^16.8.15",
     "@types/react-dom": "^16.8.4",
+    "@types/web3": "^1.0.18",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "web3": "^1.0.0-beta.53"
+    "web3": "1.0.0-beta.37"
   },
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
