@@ -80,7 +80,9 @@ export class Balance extends React.Component<BalanceProps, BalanceState> {
                     <div>
                         <div className='card space'>
                             <div className='card-body'>
-                                <h2 className='card-title'>{this.props.web3.utils.fromWei(this.state.balance, 'ether')}</h2>
+                                <h2 className='card-title'>
+                                    {new Intl.NumberFormat('en-US').format(this.props.web3.utils.fromWei(this.state.balance, 'ether'))}
+                                </h2>
                                 <h6 className='card-subtitle mb-2 text-muted'>Energy Web Token</h6>
                             </div>
                         </div>
