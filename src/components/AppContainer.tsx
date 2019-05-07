@@ -10,8 +10,6 @@ interface AppContainerState {
     chainId: number
 }
 
-
-
 export class AppContainer extends React.Component<{}, AppContainerState> {
 
     constructor(props: any) {
@@ -24,7 +22,15 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
     }
 
     async componentDidMount() {
-        const web3 = new Web3('ws://localhost:8546' || Web3.givenProvider);
+        let web3;
+        if ((window as any).ethereum) {
+            web3 = new Web3((window as any).ethereum);
+            await (window as any).ethereum.enable();
+        } else if ((window as any).web3) {
+            web3 = new Web3((window as any).web3.currentProvider);
+        } else {
+            web3 = new Web3('ws://localhost:8546');
+        }
         const holdingContract = new web3.eth.Contract(HOLDING_CONTRACT_ABI as any, HOLDING_CONTRACT_ADDRESS);
         const chainId = await web3.eth.net.getId();
         this.setState({
@@ -34,11 +40,11 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
         })
 
     }
-    //TODO: get net id from chainspec
+
     render() {
    
         return <div className='container'>
-            <h1 className='text-center text-muted space'>EWC Balance Viewer</h1>
+            <h1 className='text-center text-muted space'>Holding Contract UI</h1>
             
             {this.state.chainId === CHAIN_ID ? 
                 <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} /> : 
