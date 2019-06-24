@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "webpack-dev-server --output-public-path=/dist/ -d --watch",
-    "compile": "cd ./node_modules/ewc-system-contracts/ && npx truffle compile"
+    "start:dev": "webpack-dev-server --output-public-path=/dist/ -d --watch"
   },
   "repository": {
     "type": "git",
