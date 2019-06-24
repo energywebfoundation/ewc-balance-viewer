@@ -1,7 +1,12 @@
 import * as React from 'react';
 import Web3 = require('web3');
 import { Balance } from './Balance';
-import { CHAIN_ID, HOLDING_CONTRACT_ADDRESS, HOLDING_CONTRACT_ABI } from '../Settings';
+import {
+    EWC_CHAIN_ID,
+    VOLTA_CHAIN_ID,
+    HOLDING_CONTRACT_ADDRESS,
+    HOLDING_CONTRACT_ABI
+} from '../Settings';
 
 
 interface AppContainerState {
@@ -37,21 +42,37 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
              web3,
              holdingContract,
              chainId
-        })
+        });
+    }
 
+    renderBalance() {
+        if (this.state.chainId === VOLTA_CHAIN_ID) {
+            return [
+                <div className='alert alert-success space text-center' role='alert'>
+                    Successfully connected to <strong>Volta</strong>. This is a <strong>testnet</strong>.
+                </div>,
+                <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} />
+            ]
+        } else if (this.state.chainId === EWC_CHAIN_ID) {
+            return [
+                <div className='alert alert-success space text-center' role='alert'>
+                    Successfully connected to <strong>Energy Web Chain</strong>. This is the <strong>production chain</strong>.
+                </div>,
+                <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} />
+            ]
+        } else {
+            return <div className='alert alert-warning space' role='alert'>
+                <strong>You are not connected to Energy Web Chain or Volta test network.</strong> To connect to the Enery Web Chain or Volta, run a local node at http://localhost:8545 or use MetaMask and connect to a public RPC.
+            </div>
+        }
     }
 
     render() {
    
         return <div className='container'>
             <h1 className='text-center text-muted space'>Holding Contract UI</h1>
-            
-            {this.state.chainId === CHAIN_ID ? 
-                <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} /> : 
-                <div className='alert alert-warning space' role='alert'>
-                    <strong>You are not connected to the Energy Web Chain.</strong> To connect to the Enery Web Chain run a local node at ws://localhost:8546 or use MetaMask and connect to a public RPC.
-                </div>    
-            }
+
+            {this.renderBalance()}
             
             <div className='row more-space'>
                 <img className='center' src='/assets/energy-web-logo-final.svg' alt='light logo' />
