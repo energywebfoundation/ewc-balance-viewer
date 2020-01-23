@@ -15,3 +15,11 @@
 .card {
     background: #f3f3f3
 }
+
+.nav-item {
+    cursor: pointer;
+}
+
+.nav-pills .nav-link.active {
+    background: #894ec5;
+}

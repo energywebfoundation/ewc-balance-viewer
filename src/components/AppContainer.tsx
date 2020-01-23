@@ -1,78 +1,156 @@
 import * as React from 'react';
 import Web3 = require('web3');
-import { Balance } from './Balance';
+import { HoldingContractBalance } from './HoldingContractBalance';
+import { OriginCertificatesBalance } from './OriginCertificatesBalance';
 import {
-    EWC_CHAIN_ID,
-    VOLTA_CHAIN_ID,
-    HOLDING_CONTRACT_ADDRESS,
-    HOLDING_CONTRACT_ABI
+    NETWORKS,
+    HOLDING_CONTRACT_ADDRESS
 } from '../Settings';
+import { HOLDING_CONTRACT_ABI } from '../abi/HoldingContractABI';
 
+enum MenuItem {
+    HOLDING_CONTRACT = 'Holding Contract',
+    ORIGIN_CERTIFICATES = 'Origin Certificates'
+}
 
 interface AppContainerState {
     web3: any,
     holdingContract: any,
-    chainId: number
+    originCertificatesContract: any,
+    chainId: number,
+    accountAddress: string,
+    currentMenuItem: MenuItem
 }
 
 export class AppContainer extends React.Component<{}, AppContainerState> {
 
     constructor(props: any) {
         super(props);
+
         this.state = {
             web3: null,
             holdingContract: null,
-            chainId: null
-        }
+            originCertificatesContract: null,
+            chainId: null,
+            accountAddress: null,
+            currentMenuItem: MenuItem.HOLDING_CONTRACT
+        };
+
+        this.onAddressChange = this.onAddressChange.bind(this);
     }
 
     async componentDidMount() {
         let web3;
-        if ((window as any).ethereum) {
-            web3 = new Web3((window as any).ethereum);
-            await (window as any).ethereum.enable();
-        } else if ((window as any).web3) {
-            web3 = new Web3((window as any).web3.currentProvider);
+
+        const ethereumInstance = (window as any).ethereum;
+        const web3Instance = (window as any).web3;
+
+        if (ethereumInstance) {
+            web3 = new Web3(ethereumInstance);
+            await ethereumInstance.enable();
         } else {
-            web3 = new Web3('ws://localhost:8546');
+            web3 = new Web3(web3Instance ?? 'ws://localhost:8546');
         }
+
         const holdingContract = new web3.eth.Contract(HOLDING_CONTRACT_ABI as any, HOLDING_CONTRACT_ADDRESS);
+
         const chainId = await web3.eth.net.getId();
+
         this.setState({
              web3,
              holdingContract,
              chainId
         });
-    }
 
-    renderBalance() {
-        if (this.state.chainId === VOLTA_CHAIN_ID) {
-            return [
-                <div className='alert alert-success space text-center' role='alert'>
-                    Successfully connected to <strong>Volta</strong>. This is a <strong>testnet</strong>.
-                </div>,
-                <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} />
-            ]
-        } else if (this.state.chainId === EWC_CHAIN_ID) {
-            return [
-                <div className='alert alert-success space text-center' role='alert'>
-                    Successfully connected to <strong>Energy Web Chain</strong>. This is the <strong>production chain</strong>.
-                </div>,
-                <Balance web3={this.state.web3} holdingContract={this.state.holdingContract} />
-            ]
-        } else {
-            return <div className='alert alert-warning space' role='alert'>
-                <strong>You are not connected to Energy Web Chain or Volta test network.</strong> To connect to the Enery Web Chain or Volta, run a local node at http://localhost:8545 or use MetaMask and connect to a public RPC.
-            </div>
+        await this.fillWithFirstAddress();
+    }
+    
+    async fillWithFirstAddress() {
+        if (this.state.web3) {
+            const accounts = await this.state.web3.eth.getAccounts();
+
+            if (accounts[0] && accounts[0] !== this.state.accountAddress) {                
+                this.setState({ accountAddress: accounts[0] });
+            }
         }
     }
 
-    render() {
-   
-        return <div className='container'>
-            <h1 className='text-center text-muted space'>Holding Contract UI</h1>
+    async onAddressChange(event: any) {
+        event.persist();
+        this.setState({ accountAddress: event.target.value });
+    }
 
-            {this.renderBalance()}
+    async navigateTo(menuItem: MenuItem) {
+        this.setState({ currentMenuItem: menuItem });
+    }
+
+    render() {
+        const { chainId } = this.state;
+
+        const isValidNetwork = Object.keys(NETWORKS).includes(chainId?.toString());
+
+        const menuItems = Object.keys(MenuItem).map(key => (MenuItem as any)[key]);
+
+        return <div className='container'>
+            <h1 className='text-center text-muted space'>EWC Balances</h1>
+
+            <div className='row'>
+                <div className='col-md-3'>
+                    <ul className="nav nav-pills flex-column">
+                        {menuItems.map((menuItem, i) => {
+                            const isActive = this.state.currentMenuItem == menuItem;
+
+                            return <li key={i} className="nav-item">
+                                <a
+                                    className={`nav-link ${isActive ? 'active' : ''}`}
+                                    onClick={() => this.navigateTo(menuItem)}
+                                >{menuItem}</a>
+                            </li>;
+                        })}
+                    </ul>
+                </div>
+
+                <div className='col-md-9'>
+                    {isValidNetwork && <>
+                        <div className='alert alert-success space text-center' role='alert'>
+                            Successfully connected to <strong>{NETWORKS[chainId].name}</strong>. This is a <strong>{NETWORKS[chainId].type}</strong>.
+                        </div>
+
+                        <div className='row space'>
+                            <div className='col'>
+                                <input 
+                                    type='text'
+                                    className='form-control text-center'
+                                    placeholder='Paste account address'
+                                    onChange={this.onAddressChange}
+                                    defaultValue={this.state.accountAddress}
+                                />
+                            </div>
+                        </div>
+
+                        {this.state.currentMenuItem == MenuItem.HOLDING_CONTRACT && 
+                            <HoldingContractBalance
+                                web3={this.state.web3}
+                                holdingContract={this.state.holdingContract}
+                                accountAddress={this.state.accountAddress}
+                            />
+                        }
+
+                        {this.state.currentMenuItem == MenuItem.ORIGIN_CERTIFICATES && 
+                            <OriginCertificatesBalance
+                                web3={this.state.web3}
+                                accountAddress={this.state.accountAddress}
+                            />
+                        }
+                    </>}
+
+                    {!isValidNetwork && 
+                        <div className='alert alert-warning space' role='alert'>
+                            <strong>You are not connected to Energy Web Chain or Volta test network.</strong> To connect to the Enery Web Chain or Volta, run a local node at http://localhost:8545 or use MetaMask and connect to a public RPC.
+                        </div>
+                    }
+                </div>
+            </div>
             
             <div className='row more-space'>
                 <img className='center' src='/assets/energy-web-logo-final.svg' alt='light logo' />
