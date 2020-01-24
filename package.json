@@ -1,10 +1,11 @@
 {
   "name": "ewc-balance-viewer",
   "version": "1.0.0",
-  "description": "EWC and Volta holding balance checker",
+  "description": "EWC and Volta balance checker",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "start:dev": "webpack-dev-server --output-public-path=/dist/ -d --watch"
   },
   "repository": {
@@ -18,14 +19,14 @@
   },
   "homepage": "https://github.com/energywebfoundation/ewc-balance-viewer#readme",
   "dependencies": {
-    "@types/react": "^16.8.15",
-    "@types/react-dom": "^16.8.4",
-    "@types/web3": "^1.0.18",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "web3": "1.0.0-beta.37"
+    "web3": "1.2.2"
   },
   "devDependencies": {
+    "@types/react": "^16.8.15",
+    "@types/react-dom": "^16.8.4",
+    "@types/web3": "^1.2.2",
     "awesome-typescript-loader": "^5.2.1",
     "source-map-loader": "^0.2.4",
     "typescript": "^3.4.5",
