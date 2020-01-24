@@ -15,6 +15,9 @@ interface Certificate {
 interface OriginCertificatesBalanceState {
     registryContractAddress: string,
     balances: Certificate[],
+    selectedCertificate: Certificate,
+    sendAmount: number,
+    sendToAddress: string,
     validAddress: boolean,
     validContract: boolean,
     errorMsg: string
@@ -27,13 +30,20 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
 
         this.state = {
             registryContractAddress: ORIGIN_CERTIFICATES_ADDRESS,
+            balances: [],
+            selectedCertificate: null,
+            sendAmount: null,
+            sendToAddress: null,
             validAddress: false,
             validContract: false,
-            balances: [],
             errorMsg: null
         };
 
         this.onContractAddressChange = this.onContractAddressChange.bind(this);
+        this.setSelectedCertificate = this.setSelectedCertificate.bind(this);
+        this.setSendAmount = this.setSendAmount.bind(this);
+        this.setSendToAddress = this.setSendToAddress.bind(this);
+        this.transfer = this.transfer.bind(this);
     }
 
     componentDidUpdate(prevProps: OriginCertificatesBalanceProps) {
@@ -92,8 +102,47 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
         this.getData(event.target.value);
     }
 
+    async setSelectedCertificate(cert: Certificate) {
+        this.setState({
+            selectedCertificate: cert,
+            sendAmount: cert.energyInWh / 1e9
+        });
+    }
+
+    async setSendAmount(event: any) {
+        event.persist();
+        this.setState({ sendAmount: Number(event.target.value) });
+    }
+
+    async setSendToAddress(event: any) {
+        event.persist();
+        this.setState({ sendToAddress: event.target.value});
+    }
+
+    async transfer() {
+        const { web3, accountAddress } = this.props;
+        const { registryContractAddress, sendToAddress, sendAmount, selectedCertificate } = this.state;
+
+        const registryContract = new web3.eth.Contract(ORIGIN_CERTIFICATES_ABI as any, registryContractAddress);
+
+        await registryContract.methods.safeTransferFrom(
+            accountAddress,
+            sendToAddress,
+            selectedCertificate.certId,
+            sendAmount * 1e9,
+            ['0x0']
+        ).send({ from: accountAddress });
+    }
+
     render() {
-        const { balances, validAddress, validContract, errorMsg } = this.state;
+        const {
+            balances,
+            validAddress,
+            validContract,
+            errorMsg,
+            sendAmount,
+            sendToAddress
+        } = this.state;
 
         const isValidAddress = validAddress && this.props.accountAddress !== null && this.props.accountAddress !== '';
         const isValidContractAddress = validContract && this.state.registryContractAddress !== null && this.state.registryContractAddress !== '';
@@ -124,8 +173,21 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
                                     <div className='card space'>
                                         <div className='card-body'>
                                             <h6 className='card-subtitle text-muted'>
-                                                {balances.map((balance, index) => <div key={index}>
-                                                    {`Certificate #${balance.certId}: ${balance.energyInWh} Wh`}
+                                                {balances.map((certificate, index) => <div className="row my-2" key={index}>
+                                                    <div className='col-9'>
+                                                        {`Certificate #${certificate.certId}: ${certificate.energyInWh / 1e9} MWh`}
+                                                    </div>
+                                                    <div className='col-3'>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-primary btn-sm"
+                                                            data-toggle="modal"
+                                                            data-target="#sendModal"
+                                                            onClick={() => this.setSelectedCertificate(certificate)}
+                                                        >
+                                                            Send
+                                                        </button>
+                                                    </div>
                                                 </div>)}
                                             </h6>
                                         </div>
@@ -154,6 +216,63 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
                         {errorMsg}
                     </div>  
                 }
+                </div>
+            </div>
+
+            <div
+                className="modal fade"
+                id="sendModal"
+                tabIndex={-1}
+                role="dialog"
+                aria-labelledby="sendModalLabel"
+                aria-hidden="true"
+            >
+                <div className="modal-dialog" role="document">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="sendModalLabel">Send Certificate</h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="row">
+                                <div className="col-4">
+                                    <div className="input-group mb-3">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Amount of MWh"
+                                            aria-label="Amount of MWh"
+                                            value={sendAmount || ''}
+                                            onChange={this.setSendAmount}
+                                            aria-describedby="send-amount"
+                                        />
+                                        <div className="input-group-append">
+                                            <span className="input-group-text" id="send-amount">MWh</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="col-1">to</div>
+
+                                <div className="col-7">
+                                    <input 
+                                        type='text'
+                                        className='form-control text-center'
+                                        placeholder='Destination address'
+                                        value={sendToAddress || ''}
+                                        onChange={this.setSendToAddress}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.transfer}>Send</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>;

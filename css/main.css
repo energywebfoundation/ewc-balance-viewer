@@ -23,3 +23,8 @@
 .nav-pills .nav-link.active {
     background: #894ec5;
 }
+
+.btn-primary, .btn-primary:hover {
+    background: #894ec5;
+    border-color: #894ec5;
+}
