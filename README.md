@@ -10,3 +10,8 @@ Run locally:
 ```
 npm run start:dev
 ```
+
+Prepare files for production:
+```
+npm run build:prod
+```
