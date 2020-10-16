@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { ORIGIN_CERTIFICATES_ADDRESS } from '../Settings';
 import { ORIGIN_CERTIFICATES_ABI } from '../abi/OriginCertificatesABI';
+import { Network, NetworkProperties } from '../Settings';
 
 interface OriginCertificatesBalanceProps {
+    network: Network,
     web3: any,
     accountAddress: string
 }
@@ -29,7 +30,7 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
         super(props);
 
         this.state = {
-            registryContractAddress: ORIGIN_CERTIFICATES_ADDRESS,
+            registryContractAddress: NetworkProperties[props.network].contracts.origin,
             balances: [],
             selectedCertificate: null,
             sendAmount: null,
