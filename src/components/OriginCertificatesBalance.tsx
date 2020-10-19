@@ -1,15 +1,18 @@
 import * as React from 'react';
-import { ORIGIN_CERTIFICATES_ABI } from '../abi/OriginCertificatesABI';
+import Web3 from 'web3';
+import { ORIGIN_ISSUER_ABI } from '../abi/OriginIssuerABI';
+import { ORIGIN_REGISTRY_ABI } from '../abi/OriginRegistryABI';
 import { Network, NetworkProperties } from '../Settings';
 
 interface OriginCertificatesBalanceProps {
     network: Network,
-    web3: any,
+    web3: Web3,
     accountAddress: string
 }
 
 interface Certificate {
     certId: number,
+    deviceId: string,
     energyInWh: number
 }
 
@@ -30,7 +33,7 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
         super(props);
 
         this.state = {
-            registryContractAddress: NetworkProperties[props.network].contracts.origin,
+            registryContractAddress: NetworkProperties[props.network].contracts.originRegistry,
             balances: [],
             selectedCertificate: null,
             sendAmount: null,
@@ -66,17 +69,22 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
         let validContract = web3.utils.isAddress(registryContractAddress);
 
         if (validAddress && validContract) {
-            const registryContract = new web3.eth.Contract(ORIGIN_CERTIFICATES_ABI as any, registryContractAddress);
-
+            const registryContract = new web3.eth.Contract(ORIGIN_REGISTRY_ABI as any, registryContractAddress);
             try {
                 const certificateIds = await registryContract.methods.allCertificateIds().call({ from: accountAddress });
 
                 for (const certId of certificateIds) {
                     const balance = await registryContract.methods.balanceOf(accountAddress, certId).call();
+
+                    const { issuer: issuerContractAddress, data } = await registryContract.methods.getCertificate(certId).call();
+
+                    const issuerContract = new web3.eth.Contract(ORIGIN_ISSUER_ABI as any, issuerContractAddress);
+                    const [,,deviceId] = await issuerContract.methods.decodeData(data).call();
     
                     if (balance > 0) {
                         balances.push({
                             certId: Number(certId),
+                            deviceId,
                             energyInWh: Number(balance)
                         });
                     }
@@ -124,7 +132,7 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
         const { web3, accountAddress } = this.props;
         const { registryContractAddress, sendToAddress, sendAmount, selectedCertificate } = this.state;
 
-        const registryContract = new web3.eth.Contract(ORIGIN_CERTIFICATES_ABI as any, registryContractAddress);
+        const registryContract = new web3.eth.Contract(ORIGIN_REGISTRY_ABI as any, registryContractAddress);
 
         await registryContract.methods.safeTransferFrom(
             accountAddress,
@@ -142,11 +150,12 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
             validContract,
             errorMsg,
             sendAmount,
-            sendToAddress
+            sendToAddress,
+            registryContractAddress
         } = this.state;
 
         const isValidAddress = validAddress && this.props.accountAddress !== null && this.props.accountAddress !== '';
-        const isValidContractAddress = validContract && this.state.registryContractAddress !== null && this.state.registryContractAddress !== '';
+        const isValidContractAddress = validContract && registryContractAddress !== null && registryContractAddress !== '';
 
         return <div>
 
@@ -176,7 +185,7 @@ export class OriginCertificatesBalance extends React.Component<OriginCertificate
                                             <h6 className='card-subtitle text-muted'>
                                                 {balances.map((certificate, index) => <div className="row my-2" key={index}>
                                                     <div className='col-9'>
-                                                        {`Certificate #${certificate.certId}: ${certificate.energyInWh / 1e9} MWh`}
+                                                        {`Device: ${certificate.deviceId} - Certificate #${certificate.certId}: ${certificate.energyInWh / 1e9} MWh`}
                                                     </div>
                                                     <div className='col-3'>
                                                         <button

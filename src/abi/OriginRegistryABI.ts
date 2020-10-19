@@ -1,4 +1,4 @@
-export const ORIGIN_CERTIFICATES_ABI = [
+export const ORIGIN_REGISTRY_ABI = [
   {
     "anonymous": false,
     "inputs": [
@@ -59,9 +59,9 @@ export const ORIGIN_CERTIFICATES_ABI = [
       },
       {
         "indexed": false,
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_claimData",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       }
     ],
     "name": "ClaimBatch",
@@ -102,9 +102,9 @@ export const ORIGIN_CERTIFICATES_ABI = [
       },
       {
         "indexed": false,
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_claimData",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "ClaimSingle",
@@ -670,9 +670,9 @@ export const ORIGIN_CERTIFICATES_ABI = [
         "type": "bytes"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "bytes",
         "name": "_claimData",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "safeTransferAndClaimFrom",
@@ -710,9 +710,9 @@ export const ORIGIN_CERTIFICATES_ABI = [
         "type": "bytes"
       },
       {
-        "internalType": "bytes32[]",
+        "internalType": "bytes[]",
         "name": "_claimData",
-        "type": "bytes32[]"
+        "type": "bytes[]"
       }
     ],
     "name": "safeBatchTransferAndClaimFrom",
@@ -811,6 +811,88 @@ export const ORIGIN_CERTIFICATES_ABI = [
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_beneficiary",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_address",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_region",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_zipCode",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_countryCode",
+        "type": "string"
+      }
+    ],
+    "name": "encodeClaimData",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "_claimData",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "_claimData",
+        "type": "bytes"
+      }
+    ],
+    "name": "decodeClaimData",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "_beneficiary",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_address",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_region",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_zipCode",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_countryCode",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
     "type": "function"
   }
 ];
