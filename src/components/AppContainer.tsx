@@ -3,8 +3,9 @@ import Web3 = require('web3');
 import { HoldingContractBalance } from './HoldingContractBalance';
 import { OriginCertificatesBalance } from './OriginCertificatesBalance';
 import {
-    NETWORKS,
-    HOLDING_CONTRACT_ADDRESS
+    HOLDING_CONTRACT_ADDRESS,
+    NetworkProperties,
+    Network
 } from '../Settings';
 import { HOLDING_CONTRACT_ABI } from '../abi/HoldingContractABI';
 
@@ -86,8 +87,7 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
 
     render() {
         const { chainId } = this.state;
-
-        const isValidNetwork = Object.keys(NETWORKS).includes(chainId?.toString());
+        const network = Object.values(Network).find(networkId => networkId === chainId);
 
         const menuItems = Object.keys(MenuItem).map(key => (MenuItem as any)[key]);
 
@@ -111,9 +111,9 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
                 </div>
 
                 <div className='col-md-9'>
-                    {isValidNetwork && <>
+                    {network && <>
                         <div className='alert alert-success space text-center' role='alert'>
-                            Successfully connected to <strong>{NETWORKS[chainId].name}</strong>. This is a <strong>{NETWORKS[chainId].type}</strong>.
+                            Successfully connected to <strong>{NetworkProperties[network].name}</strong>. This is a <strong>{NetworkProperties[network].type}</strong>.
                         </div>
 
                         <div className='row space'>
@@ -138,15 +138,16 @@ export class AppContainer extends React.Component<{}, AppContainerState> {
 
                         {this.state.currentMenuItem == MenuItem.ORIGIN_CERTIFICATES && 
                             <OriginCertificatesBalance
+                                network={network as Network}
                                 web3={this.state.web3}
                                 accountAddress={this.state.accountAddress}
                             />
                         }
                     </>}
 
-                    {!isValidNetwork && 
+                    {!network && 
                         <div className='alert alert-warning space' role='alert'>
-                            <strong>You are not connected to Energy Web Chain or Volta test network.</strong> To connect to the Enery Web Chain or Volta, run a local node at http://localhost:8545 or use MetaMask and connect to a public RPC.
+                            <strong>You are not connected to Energy Web Chain or Volta test network.</strong> To connect to the Energy Web Chain or Volta, run a local node at http://localhost:8545 or use MetaMask and connect to a public RPC.
                         </div>
                     }
                 </div>
