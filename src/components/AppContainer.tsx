@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Web3 from 'web3';
+import Web3 = require('web3');
 import { HoldingContractBalance } from './HoldingContractBalance';
 import { OriginCertificatesBalance } from './OriginCertificatesBalance';
 import {

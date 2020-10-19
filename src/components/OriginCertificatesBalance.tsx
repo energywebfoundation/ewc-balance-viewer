@@ -1,12 +1,11 @@
 import * as React from 'react';
-import Web3 from 'web3';
 import { ORIGIN_ISSUER_ABI } from '../abi/OriginIssuerABI';
 import { ORIGIN_REGISTRY_ABI } from '../abi/OriginRegistryABI';
 import { Network, NetworkProperties } from '../Settings';
 
 interface OriginCertificatesBalanceProps {
     network: Network,
-    web3: Web3,
+    web3: any,
     accountAddress: string
 }
 
