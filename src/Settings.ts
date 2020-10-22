@@ -10,8 +10,8 @@ export const NetworkProperties = {
       name: 'Volta',
       type: 'testnet',
       contracts: {
-        originRegistry: '0xBf5c2De6FD2998fd3f061C4a5Ed4dF590c1e95E7',
-        originIssuer: '0x3fb506A70f7Ecc411BDE518dC8c4855eDB6Ae499'
+        originRegistry: '0xdB4837e3Eb55115f5976b45F4102470F56e68F2d',
+        originIssuer: '0x7038F3294c48aaf257026cc55a386A31F2A8fb3c'
       }
   },
   [Network.EWC.toString()]: {
